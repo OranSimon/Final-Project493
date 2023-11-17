@@ -1,5 +1,4 @@
 import numpy as np
-from enum import Enum
 
 
 def _to_b36(num: float):
@@ -58,27 +57,39 @@ def decode_hash(hash_str: str):
 
 
 # NOTE: maybe we can add some randomness to the coordinates
-def generate_global_grid(start_lat, start_lng, lat_divisions, lng_divisions):
-    lat_range = (-90, 90)
-    lng_range = (-180, 180)
+def generate_coordinates(
+    start_lat, start_lng, end_lat, end_lng, lat_divisions, lng_divisions
+):
+    """
+    Generates a coordinates as a list of tuples within the specified area.
 
-    lat_step = (lat_range[1] - lat_range[0]) / lat_divisions
-    lng_step = (lng_range[1] - lng_range[0]) / lng_divisions
+    Parameters:
+    start_lat (float): Starting latitude.
+    start_lng (float): Starting longitude.
+    end_lat (float): Ending latitude.
+    end_lng (float): Ending longitude.
+    lat_divisions (int): Number of subdivisions in latitude.
+    lng_divisions (int): Number of subdivisions in longitude.
 
-    coordinates = []
-    for i in range(lat_divisions):
-        for j in range(lng_divisions):
-            lat = start_lat + i * lat_step
-            lng = start_lng + j * lng_step
+    Returns:
+    list of tuples: A list of coordinates representing the grid.
+    """
+    # Calculate the step sizes
+    lat_step = (end_lat - start_lat) / lat_divisions
+    lng_step = (end_lng - start_lng) / lng_divisions
 
-            if lat > lat_range[1]:
-                lat = lat_range[1]
-            if lng > lng_range[1]:
-                lng = lng_range[1]
+    # Generate ranges for latitudes and longitudes
+    latitudes = np.arange(start_lat, end_lat, lat_step)
+    longitudes = np.arange(start_lng, end_lng, lng_step)
 
-            coordinates.append((lat, lng))
+    # Ensure that the end values are included
+    latitudes = np.append(latitudes, end_lat)
+    longitudes = np.append(longitudes, end_lng)
 
-    return coordinates
+    # Create a meshgrid of coordinates
+    lat_grid, lng_grid = np.meshgrid(latitudes, longitudes, indexing="ij")
 
+    # Convert to list of tuples
+    grid_tuples = [(lat, lng) for lat, lng in zip(lat_grid.ravel(), lng_grid.ravel())]
 
-print(decode_hash("i3keo_1qm2iu_43.7_b506"))
+    return grid_tuples
