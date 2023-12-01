@@ -93,3 +93,22 @@ def generate_coordinates(
     grid_tuples = [(lat, lng) for lat, lng in zip(lat_grid.ravel(), lng_grid.ravel())]
 
     return grid_tuples
+
+import geopandas as gpd
+import shapely.geometry as geom
+import random
+
+# Function to generate a random point on land
+def generate_random_point_on_land(land_gdf):
+    while True:
+        # Generate random latitude and longitude
+        latitude = random.uniform(-66, 90)
+        longitude = random.uniform(-180, 180)
+
+        # Create a point geometry
+        point = geom.Point(longitude, latitude)
+
+        # Check if the point is on land
+        if land_gdf.geometry.intersects(point).any():
+            return (latitude, longitude)
+
